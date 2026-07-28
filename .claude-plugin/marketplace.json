@@ -18,6 +18,46 @@
       "license": "MIT",
       "category": "testing",
       "keywords": ["test", "diagnostic", "roundtrip"]
+    },
+    {
+      "name": "gce-suite",
+      "source": "./plugins/gce-suite",
+      "description": "The Gareth Cohen Experience operating team: bookings, cold outreach, command secretary, finance controller, risk reviewer, SEO and website, social campaigns, the daily agency gig sweep, and the annual sole trader tax return. Nine skills.",
+      "author": { "name": "Gareth Cohen" },
+      "homepage": "https://github.com/Drummingazz/claude-universal-skills",
+      "license": "MIT",
+      "category": "engine",
+      "keywords": ["gce", "bookings", "outreach", "finance", "seo", "social", "tax"]
+    },
+    {
+      "name": "ge-suite",
+      "source": "./plugins/ge-suite",
+      "description": "Global Exporters operating team: the email command centre, freight quote intake into Airtable, and the hard gated verification protocol for the Command Centre app. Three skills.",
+      "author": { "name": "Gareth Cohen" },
+      "homepage": "https://github.com/Drummingazz/claude-universal-skills",
+      "license": "MIT",
+      "category": "engine",
+      "keywords": ["global-exporters", "freight", "email", "airtable", "uae"]
+    },
+    {
+      "name": "os-suite",
+      "source": "./plugins/os-suite",
+      "description": "Cross engine operating skills: daily focus, session handoff, honesty mode, the greenlight council, and the OS operator and optimizer. Seven skills. Three of them carry hardcoded Windows paths and are Claude Code only until reworked.",
+      "author": { "name": "Gareth Cohen" },
+      "homepage": "https://github.com/Drummingazz/claude-universal-skills",
+      "license": "MIT",
+      "category": "operating",
+      "keywords": ["focus", "handoff", "honesty", "decision", "operator", "audit"]
+    },
+    {
+      "name": "writing-suite",
+      "source": "./plugins/writing-suite",
+      "description": "Engine aware outbound writing: LinkedIn posts in the correct brand voice per engine, and the newsletter writer. Two skills. Both draft only, neither publishes.",
+      "author": { "name": "Gareth Cohen" },
+      "homepage": "https://github.com/Drummingazz/claude-universal-skills",
+      "license": "MIT",
+      "category": "content",
+      "keywords": ["linkedin", "newsletter", "content", "brand-voice"]
     }
   ]
 }

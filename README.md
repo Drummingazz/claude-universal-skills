@@ -6,9 +6,35 @@ install skills from, so a skill is written once and reaches every surface.
 Marketplace name: `gareth-skills`
 Owner: Gareth Cohen
 
-> Status: skeleton. It currently ships exactly one throwaway plugin, `roundtrip-test`, whose only
-> job is to prove the install path works end to end. Real skills get migrated in deliberately,
-> after the round trip is confirmed on both surfaces.
+> Status: round trip confirmed on both surfaces, and the first migration is in. Skills are grouped
+> into suites by engine rather than shipped one plugin per skill, so you install once per engine
+> and can switch a whole engine off when you are not working in it.
+
+## What ships
+
+| Plugin | Skills | Contents |
+| --- | --- | --- |
+| `gce-suite` | 9 | bookings-manager, cold-outreach, command-secretary, finance-controller, risk-reviewer, seo-website, social-campaign, gigscan, tax-return-assistant |
+| `ge-suite` | 3 | email-command-centre, freight-quote-intake, ge-debug-verify |
+| `os-suite` | 7 | daily-focus, re-fresh, honesty, greenlight-council, gareth-os-operator, gareth-os-optimizer, skill-adapter |
+| `writing-suite` | 2 | linkedin-writer, newsletter-writer |
+| `roundtrip-test` | 1 | roundtrip-check, the throwaway install prover. Keep it. It is the fastest way to tell whether a surface is working before you debug a real skill. |
+
+### Deliberately not shipped
+
+| Skill | Why |
+| --- | --- |
+| `agent-stress-test` | ships a live OpenAI key alongside it. Needs the secret moved out first. |
+| `zoho-bank-categoriser` | ships Zoho self client credentials, plus a `.bat` and two `.py` files that cannot run in a Linux Cowork session. Already documented as Claude Code only. |
+| `ge-command-centre-stress-test` | has no `SKILL.md`. It loads nowhere as it stands. |
+| `email-scan`, `email-response-workflow`, `email-scanner-ge` | superseded by `email-command-centre`, which says so in its own description. Shipping four near-identical descriptions makes it unpredictable which one Claude reaches for. They remain in the vault, untouched. |
+
+### Known limitation in `os-suite`
+
+`gareth-os-operator`, `gareth-os-optimizer` and `skill-adapter` contain hardcoded
+`C:\Users\...` paths. They work in Claude Code on Gareth's machine and will not work in a Linux
+Cowork cloud session. That was already true before this repo existed. Install `os-suite`
+anywhere, but expect those three to be Code only until the paths are parameterised.
 
 ## What is in here
 

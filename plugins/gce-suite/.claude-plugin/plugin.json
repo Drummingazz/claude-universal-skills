@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "gce-suite",
+  "displayName": "GCE Suite",
+  "description": "The Gareth Cohen Experience operating team: bookings, cold outreach, command secretary, finance controller, risk reviewer, SEO and website, social campaigns, the daily agency gig sweep, and the annual sole trader tax return.",
+  "author": { "name": "Gareth Cohen", "email": "gc1062038@gmail.com" },
+  "repository": "https://github.com/Drummingazz/claude-universal-skills",
+  "license": "MIT",
+  "keywords": ["gce", "bookings", "outreach", "finance", "seo", "social", "tax"]
+}

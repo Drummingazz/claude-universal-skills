@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "ge-suite",
+  "displayName": "Global Exporters Suite",
+  "description": "Global Exporters operating team: the email command centre, freight quote intake into Airtable, and the hard gated verification protocol for the Command Centre app.",
+  "author": { "name": "Gareth Cohen", "email": "gc1062038@gmail.com" },
+  "repository": "https://github.com/Drummingazz/claude-universal-skills",
+  "license": "MIT",
+  "keywords": ["global-exporters", "freight", "email", "airtable", "uae"]
+}

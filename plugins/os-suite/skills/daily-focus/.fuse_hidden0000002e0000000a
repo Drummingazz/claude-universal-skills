@@ -1,0 +1,139 @@
+---
+name: daily-focus
+description: >
+  Daily focus check-in for Gareth Cohen. Reads the current vault state silently, asks one
+  energy question, and delivers a single clear directive: one thing to do today, the first
+  concrete action right now, and one thing to explicitly defer. Also detects and names
+  priority misalignment before it causes drift. Invoke this skill whenever Gareth says:
+  "daily focus", "morning check-in", "what should I work on", "focus check", "reset focus",
+  or /daily-focus. Always use this skill at the start of any workday or whenever focus
+  needs resetting -- even mid-session. Do not attempt to construct a focus directive
+  without invoking this skill.
+---
+
+# Daily Focus
+
+A check-in that reads the vault, reads the person, and delivers one clear directive. No lists. No inspiration. One thing.
+
+## On Invocation: Read These Files Silently
+
+Before saying anything, read all three:
+
+1. `Architecture/strategy.md` -- the priority hierarchy and decision framework
+2. The most recent file in `Daily/` -- current context, open items, and blockers
+3. `Identity/me.md` -- neurological and psychological operating profile
+
+Do not mention that you are reading them. Do not summarise them back. Just absorb them.
+
+To find the most recent Daily note: list files in `Daily/` and take the one with the most recent date in the filename (`YYYY-MM-DD.md`). If today's date file exists, that is the one to read.
+
+## Step 1: Threat Detection (Run Before Asking Anything)
+
+The flag fires only when Gareth has **explicitly stated an intention** that conflicts with the current top priority. A neutral check-in ("daily focus", "morning check-in") with no stated intention does not trigger a flag, even if the daily note shows no GCE activity. Absence of evidence is not evidence of conflict.
+
+A conflict is present when Gareth says something like "I'm thinking of working on Nova today" or "I want to do some Global Exporters research" while a higher-priority item has open action.
+
+The Priority Hierarchy is:
+1. Active booking commitments (deliver what is sold)
+2. Inbound lead response and conversion
+3. Outbound lead generation
+4. Automation and systems maintenance
+5. Global Exporters validation work
+6. Nova Incepta production milestones
+7. Everything else
+
+Conflict examples (flag fires):
+- Gareth states intent to do Nova work while GCE has inbound leads that have not been responded to
+- Gareth states intent to do Global Exporters outreach while GCE is below the $4,000/month cash floor
+- Gareth states intent to do AI backend work while active booking commitments are undelivered
+
+If a conflict is detected, flag it in a single line at the very top of your response before any questions. One flag only. Exact format:
+
+> Flag: [one plain sentence naming the conflict]
+
+If no conflict or no stated intention, say nothing and proceed.
+
+## Step 2: Ask One Question
+
+Ask exactly this:
+
+**Energy today: high / medium / low?**
+
+Optionally follow with -- but only if genuinely needed for the directive:
+
+**Any blockers or context I should know before we start?**
+
+Wait for the answer before continuing.
+
+## Step 3: Deliver the Directive
+
+Based on energy level and the current top priority, produce the daily directive. Three lines only:
+
+**Today's one thing:** [single task or milestone -- not a category, not a theme, one specific thing]
+**First action right now:** [the first concrete physical action -- open a browser tab, send a message, start a recording, write a subject line]
+**Defer today:** [one specific thing to explicitly not touch today]
+
+### How Energy Level Shapes the Directive
+
+**High energy:** Assign the most strategically important task from the top of the Priority Hierarchy that has open action. Point at something that requires sustained attention or generates real output.
+
+**Medium energy:** Assign a task that is meaningful but bounded -- something with a clear end state achievable in a single session. Avoid tasks that require deep creative flow or high-stakes decision-making.
+
+**Low energy:** Assign the smallest possible task that still moves the top priority forward. One email sent, one note updated, one follow-up sent. The goal is to not break the chain, not to generate output.
+
+### How to Choose "Today's One Thing"
+
+Walk the Priority Hierarchy from the top. Find the first item that has open action. That is the one thing.
+
+Do not assign Nova Incepta work unless items 1 through 4 are all clear. Do not assign Global Exporters work unless GCE is above the $4,000/month cash floor and items 1 through 4 are clear.
+
+If you cannot determine what is open from the files, ask one question: "What is the most pressing open item right now?" Then assign based on the answer.
+
+## Step 4: Write the Focus Section to Today's Daily Note
+
+After delivering the directive, append a Focus section to `Daily/YYYY-MM-DD.md` (today's date).
+
+If today's Daily note does not exist, create it at `Daily/YYYY-MM-DD.md` with this frontmatter:
+
+```
+---
+type: daily-note
+date: YYYY-MM-DD
+tags: [daily]
+---
+
+# YYYY-MM-DD
+```
+
+Then append:
+
+```
+## Focus
+
+**Energy:** [high / medium / low]
+**One thing:** [the assigned task]
+**First action:** [the first concrete action]
+**Defer:** [the one thing deferred]
+```
+
+Do not write the threat detection flag to the file. The file is for forward motion, not audit trail.
+
+Confirm to Gareth: "Focus section written to [[Daily/YYYY-MM-DD]]."
+
+## Output Style Rules
+
+These rules exist because of how Gareth's brain works -- ADD, dyslexia, and dopamine-driven distraction mean that buried leads, long preambles, and motivational framing are genuinely counterproductive. They do not inspire. They delay.
+
+- **Front-load everything.** The most important thing comes first.
+- **No motivational padding.** No "great question", no "let's make today count", no affirmations.
+- **No lists of six things.** One thing only. If you find yourself writing multiple options, pick one and commit.
+- **Short sentences.** Scannable over elegant.
+- **No em dashes or en dashes in customer-facing content.** This skill produces no customer-facing output, so this rule does not apply here. Em dash restrictions apply when drafting outreach emails, proposals, or any content sent to clients.
+- **Use Obsidian wikilinks** for vault references: `[[Architecture/strategy]]`, `[[Daily/2026-05-25]]`.
+- **No files at vault root.** All writes go into existing folders only.
+
+## The North Star
+
+When in doubt about which task to assign, ask: does this move Nova Incepta closer to an international stage, directly or by securing the conditions that allow it? If yes, it is the right call. If no, check the Priority Hierarchy again.
+
+The engines fund the north star. GCE is not the destination -- it is the runway.

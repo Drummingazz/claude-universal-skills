@@ -1,0 +1,29 @@
+{
+  "skill_name": "freight-quote-intake",
+  "evals": [
+    {
+      "id": 0,
+      "name": "seaway-sea-reefer-full",
+      "prompt": "Dry run (don't write to Airtable yet, just show me the mapped record + summary). Capture this freight quote:\n\nFrom: Nathan Borg <nathan.borg@seaway.com.au>\nDate: 28 May 2026\nSubject: Reefer quote Adelaide > Jebel Ali\n\nHi Gareth,\nPleased to confirm the following for your fresh produce reefer shipment.\n\nService: Sea freight, reefer (20RE or 40RE), Adelaide to Jebel Ali via Fujairah, CFR.\nOcean freight: USD 12,500 per container.\nAustralian origin charges (AUD): Bill of Lading 150.00, export clearance 65.00, export docs 45.00, technology fee 14.50, PRA 35.00 — OTHC inclusive. Total AUD 309.50.\nBunker, emergency fuel, carrier security and on-carriage: all inclusive.\nExcludes: marine and road insurance, destination charges, customs duties, taxes.\nValidity: until 15.06.2026.\n\nRegards, Nathan",
+      "expected_output": "Record mapped to Adelaide to Jebel Ali route + Seaway provider. Freight Cost 12500 USD, Origin Charges 309.50 AUD, bunker noted inclusive. Validity 2026-06-15 surfaced prominently. MISSING flagged: destination charges, marine insurance, road insurance, war risk surcharge (not separately stated), customs/duties, inland trucking, contact phone optional. Critical gaps called out. Genset: Not Applicable (no inland leg, Jebel Ali direct) or flagged. AUD conversion at a live rate with the rate noted as assumption. Pricing scenario: No, blocked on destination charges + insurance + war risk.",
+      "files": [],
+      "assertions": []
+    },
+    {
+      "id": 1,
+      "name": "msc-sparse-reefer-blocked",
+      "prompt": "Dry run — don't commit to Airtable, just extract and summarise. Here's a reefer rate that came in from MSC:\n\n\"Hi Gareth, indicative reefer rate Adelaide to Khor Fakkan via Colombo, 40ft reefer: USD 11,800 ocean. War risk USD 3,800 per box applies. Transit approx 60 days. Subject to space and equipment availability. Rate valid 7 days from today (30 May 2026). Regards, Stuart Taylor, MSC\"",
+      "expected_output": "Maps to Adelaide to Khorfakkan to Dubai route + MSC provider (Stuart Taylor, stuart.taylor@msc.com). Freight Cost 11800 USD, War Risk 3800 USD captured. Transit ~60 days. Validity 2026-06-06 (7 days from 30 May) surfaced. Many MISSING: destination charges, origin charges, inland trucking, marine insurance, road insurance, customs, genset, reefer plug, demurrage, container empty return. Genset Not Confirmed for sea reefer -> loud flag + follow-up to Stuart. Pricing scenario: No, blocked on destination charges, inland trucking, insurance, genset.",
+      "files": [],
+      "assertions": []
+    },
+    {
+      "id": 2,
+      "name": "seaway-air-freight-tiers",
+      "prompt": "Dry run please (preview only, no Airtable write). Log this air freight quote for our premium produce:\n\nFrom Ryan Harrowfield, Seaway Adelaide perishable air freight. Emirates SkyCargo, Adelaide to DXB, per kg: +100kg 5.60, +300kg 5.30, +500kg 5.15, +1000kg 4.55, +2000kg 4.50, +3000kg 4.45 (AUD/kg). Local charges: AWB 30 per shipment, terminal doc 80 per shipment, screening 0.12/kg (min 60), plus handling/security/inspection fees. We're looking at roughly 500kg. Valid to 13 June 2026.",
+      "expected_output": "Air freight method, no reefer/genset (Not Applicable). Container Type = air weight tier (+500kg = AUD 5.15/kg). No canonical sea route -> Route left blank and flagged (air to DXB). Provider Seaway (Ryan Harrowfield). Base rate captured for the 500kg tier; locals noted. Validity 2026-06-13. MISSING: insurance, customs, destination/handling itemisation maybe. Genset Not Applicable. AUD already, no conversion needed. Pricing scenario assessment given.",
+      "files": [],
+      "assertions": []
+    }
+  ]
+}

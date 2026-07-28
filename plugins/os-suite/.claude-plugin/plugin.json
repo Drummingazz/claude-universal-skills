@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "os-suite",
+  "displayName": "Personal OS Suite",
+  "description": "Cross engine operating skills: the daily focus check-in, clean session handoff, epistemic honesty mode, the greenlight council for pressure testing a decision, and the OS operator and optimizer. Note that os-operator, os-optimizer and skill-adapter contain hardcoded Windows paths and are Claude Code only until reworked.",
+  "author": { "name": "Gareth Cohen", "email": "gc1062038@gmail.com" },
+  "repository": "https://github.com/Drummingazz/claude-universal-skills",
+  "license": "MIT",
+  "keywords": ["focus", "handoff", "honesty", "decision", "operator", "audit"]
+}

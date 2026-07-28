@@ -1,0 +1,23 @@
+{
+  "skill_name": "greenlight-council",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "I want to build a proper coded backend that unifies all my scattered Make.com workflows into one GCE dashboard: lead gen, outreach, auto-drafting, booking, invoicing, finance, rebooking, reviews, and social. It would be the flagship of my AI Backend. Should I go for it? Run the council on this.",
+      "expected_output": "Council convenes. Cash Stability juror flags this as AI Backend expansion gated until GCE and Import/Export are stable (GCE A$4,000 floor). Lighter Beats Heavier juror pushes Cowork-native (skills, connectors, live artifacts) over a coded app and invokes the Global Exporters scar. Verdict is reshape or kill with a cheap test (start with one live artifact). No research needed (internal build). No em dashes.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "prompt": "Should I subscribe to a new AI lead-gen tool? It's about US$80 a month and it scrapes prospects and auto-sends cold emails for GCE bookings. Greenlight this for me.",
+      "expected_output": "Council convenes. Cash Stability and the spending rule are raised (recurring subscription needs approval, do not assume cheap is fine, expansion gated until cash stable). Buyer/Client juror flags reputation risk of auto cold-emailing schools, NDIS, corporate contacts. Verdict reshape or kill with a cheap manual-first test. No em dashes.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I want to send indicative pricing to a UAE buyer for our Adelaide oranges this week, to lock in their interest before a competitor gets there first. Good move? Roast it.",
+      "expected_output": "Council convenes and treats this as market-facing (research pass allowed). The decisive point is the hard rule: Import/Export buyer pricing is gated until landed-cost modelling and margin are validated, and this may need three-way sign-off with Dimi and Jimmy. Verdict is KILL or hard RESHAPE. Cheapest test is to validate landed-cost margin first, or send a non-pricing interest-gauging message. No em dashes.",
+      "files": []
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "writing-suite",
+  "displayName": "Writing Suite",
+  "description": "Engine aware outbound writing: LinkedIn posts in the correct brand voice per engine, and the newsletter writer that interviews once then drafts every edition without questions. Both draft only. Neither publishes.",
+  "author": { "name": "Gareth Cohen", "email": "gc1062038@gmail.com" },
+  "repository": "https://github.com/Drummingazz/claude-universal-skills",
+  "license": "MIT",
+  "keywords": ["linkedin", "newsletter", "content", "brand-voice"]
+}
