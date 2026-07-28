@@ -38,18 +38,26 @@ Two rules explain that layout:
 Two steps: register the catalogue, then install the plugin you want from it. Adding the
 marketplace on its own installs nothing.
 
-**1. Add the marketplace** (run this inside a `claude` terminal session):
+Inside a terminal `claude` session that is step 1 and step 2 below, typed as slash commands.
+If you are in the **Claude Code desktop app**, `/plugin` opens an interactive terminal panel
+that the app does not host, so use the non interactive shell form instead. The desktop app
+ships its own copy of the CLI, so you do not need a separate install:
+
+```
+C:\Users\<you>\AppData\Roaming\Claude\claude-code\<version>\claude.exe
+```
+
+**1. Add the marketplace.** Slash form, then shell form:
 
 ```bash
 /plugin marketplace add Drummingazz/claude-universal-skills
 ```
 
-The `owner/repo` shorthand works for public GitHub repos. There is also a non interactive
-shell form, useful for scripting:
-
 ```bash
 claude plugin marketplace add Drummingazz/claude-universal-skills
 ```
+
+The `owner/repo` shorthand works for public GitHub repos.
 
 **2. Install the plugin:**
 
@@ -57,14 +65,16 @@ claude plugin marketplace add Drummingazz/claude-universal-skills
 /plugin install roundtrip-test@gareth-skills
 ```
 
-`gareth-skills` is the `name` field inside `marketplace.json`, not the repo name. That is the
-name you always install against.
-
-**3. Activate it in the current session** (otherwise it loads on next launch):
-
 ```bash
-/reload-plugins
+claude plugin install roundtrip-test@gareth-skills --scope user
 ```
+
+`gareth-skills` is the `name` field inside `marketplace.json`, not the repo name. That is the
+name you always install against. Scopes are `user` (you, everywhere), `project` (everyone on
+this repo), and `local` (you, this repo only).
+
+**3. Activate it.** In a terminal session, `/reload-plugins` picks it up without a restart.
+Otherwise just start a new session, which is the reliable route in the desktop app.
 
 **4. Run the skill.** Plugin skills are namespaced by plugin name:
 
@@ -74,22 +84,54 @@ name you always install against.
 
 It should print `ROUNDTRIP-OK-7F3A`. That code appearing is the proof.
 
-Useful checks:
+Useful checks, in either form:
 
 ```bash
-/plugin marketplace list
+claude plugin marketplace list
 ```
 
 ```bash
-/plugin list
+claude plugin list
 ```
 
-Note: `/plugin` opens an interactive terminal panel. It works in a real `claude` terminal
-session. In the Claude Code desktop app, use the app's own plugin browser instead.
+Validate before you push, so a broken manifest never reaches anyone:
+
+```bash
+claude plugin validate .
+```
+
+### What the install writes
+
+Adding and installing edits `~/.claude/settings.json`. You can also write these two blocks by
+hand, which is the only route available in a cloud session, where the plugin browser does not
+exist:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "gareth-skills": {
+      "source": { "source": "github", "repo": "Drummingazz/claude-universal-skills" }
+    }
+  },
+  "enabledPlugins": {
+    "roundtrip-test@gareth-skills": true
+  }
+}
+```
+
+The plugin files themselves are copied to
+`~/.claude/plugins/cache/gareth-skills/<plugin>/<version>/`. Nothing runs from this git repo
+directly.
 
 ## Add the marketplace in Cowork
 
 Cowork does the same two steps, through the UI rather than slash commands.
+
+**Cowork is a separate install, not a sync.** Its skills, plugins and connectors come from the
+**Customize** configuration, which syncs through your claude.ai account, not from the CLI's
+`~/.claude` directory. Installing this plugin in Claude Code does nothing for Cowork, and the
+reverse is also true. Every plugin gets installed twice, once per surface. That is the price of
+one repo reaching both, and it is still far better than hand copying skill files.
 
 1. Open **Customize** in the sidebar, then **Plugins**.
 2. Select **Add marketplace** and paste the repo URL. Cowork accepts either
@@ -166,6 +208,25 @@ you pushed.
 - Every `SKILL.md` needs valid frontmatter with `name` and `description`, or it is never
   discovered.
 - A skill's frontmatter `name` should match its directory name.
+
+## Gotchas found the hard way
+
+**Always invoke the namespaced form when testing.** A plugin skill is
+`/roundtrip-test:roundtrip-check`. The bare `/roundtrip-check` may resolve to a local copy in
+`~/.claude/skills/` and tell you the install worked when it did not. Only the namespaced form
+proves the plugin loaded.
+
+**The `mirror-skill.js` PostToolUse hook contaminates tests on Gareth's Windows machine.** It
+copies any `SKILL.md` written or edited in a Claude Code session into `~/.claude/skills/<name>/`.
+Editing a skill in this repo therefore creates a second, local copy that shadows the plugin. When
+testing a change here, delete the mirrored copy first:
+
+```bash
+rm -rf "$HOME/.claude/skills/<skill-name>"
+```
+
+**A session keeps the plugin version it loaded at launch.** Push, refresh the marketplace, then
+start a new session. Testing in the session that was already open tells you nothing.
 
 ## Relationship to `~/.claude/skills/`
 
