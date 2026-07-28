@@ -228,6 +228,17 @@ rm -rf "$HOME/.claude/skills/<skill-name>"
 **A session keeps the plugin version it loaded at launch.** Push, refresh the marketplace, then
 start a new session. Testing in the session that was already open tells you nothing.
 
+**In Cowork, a newly installed plugin does not reach an already open session, and the error it
+gives you is misleading.** An open session showed the skill as a blue recognised name and listed
+it in the Context panel, then answered `/roundtrip-check` with
+`Unknown command: /roundtrip-test:roundtrip-check`. That looks like a namespacing bug and is not
+one. Cowork expands the name internally while the session's registry is still stale. A brand new
+Cowork session ran the same skill first time. **Always test in a fresh session before reporting a
+Cowork plugin as broken.**
+
+**Cowork does not use the `plugin:skill` namespace when you type it.** Claude Code wants
+`/roundtrip-test:roundtrip-check`. In Cowork you type the bare `/roundtrip-check`.
+
 ## Relationship to `~/.claude/skills/`
 
 `~/.claude/skills/` is the existing local store on Gareth's Windows machine, mirrored there by
