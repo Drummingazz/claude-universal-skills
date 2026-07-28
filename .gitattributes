@@ -1,0 +1,6 @@
+# Cowork cloud sessions are Linux. Keep everything LF in the repo so files stay
+# portable regardless of which machine authored them.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.pdf binary

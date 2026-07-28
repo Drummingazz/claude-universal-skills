@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "gareth-skills",
+  "description": "Gareth Cohen's personal Claude skills, packaged as plugins for Claude Code and Cowork.",
+  "owner": {
+    "name": "Gareth Cohen",
+    "email": "gc1062038@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "roundtrip-test",
+      "source": "./plugins/roundtrip-test",
+      "description": "Throwaway test plugin. Its single skill prints one known phrase, to prove the marketplace round trip works in both Claude Code and Cowork.",
+      "author": {
+        "name": "Gareth Cohen"
+      },
+      "license": "MIT",
+      "category": "testing",
+      "keywords": ["test", "diagnostic", "roundtrip"]
+    }
+  ]
+}

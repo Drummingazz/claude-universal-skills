@@ -1,0 +1,16 @@
+# OS noise
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Editor noise
+.vscode/
+.idea/
+*.swp
+
+# Never commit secrets to a public marketplace repo
+.env
+*.key
+*_key
+*.pem
+*token*

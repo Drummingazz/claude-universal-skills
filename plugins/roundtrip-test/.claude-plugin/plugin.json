@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "roundtrip-test",
+  "displayName": "Round Trip Test",
+  "description": "Throwaway test plugin. Its single skill prints one known phrase, to prove the marketplace round trip works in both Claude Code and Cowork.",
+  "author": {
+    "name": "Gareth Cohen",
+    "email": "gc1062038@gmail.com"
+  },
+  "repository": "https://github.com/GarethCohen/claude-universal-skills",
+  "license": "MIT",
+  "keywords": ["test", "diagnostic", "roundtrip"]
+}
