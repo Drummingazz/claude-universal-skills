@@ -41,14 +41,14 @@ marketplace on its own installs nothing.
 **1. Add the marketplace** (run this inside a `claude` terminal session):
 
 ```bash
-/plugin marketplace add <OWNER>/claude-universal-skills
+/plugin marketplace add Drummingazz/claude-universal-skills
 ```
 
 The `owner/repo` shorthand works for public GitHub repos. There is also a non interactive
 shell form, useful for scripting:
 
 ```bash
-claude plugin marketplace add <OWNER>/claude-universal-skills
+claude plugin marketplace add Drummingazz/claude-universal-skills
 ```
 
 **2. Install the plugin:**
@@ -93,8 +93,8 @@ Cowork does the same two steps, through the UI rather than slash commands.
 
 1. Open **Customize** in the sidebar, then **Plugins**.
 2. Select **Add marketplace** and paste the repo URL. Cowork accepts either
-   `https://github.com/<OWNER>/claude-universal-skills` or the shorthand
-   `<OWNER>/claude-universal-skills`.
+   `https://github.com/Drummingazz/claude-universal-skills` or the shorthand
+   `Drummingazz/claude-universal-skills`.
 3. The plugins from this repo now appear next to plugins from other marketplaces.
    Select `roundtrip-test` and click **Install**.
 4. Open the installed plugin to see its skills, and confirm `roundtrip-check` is listed and
