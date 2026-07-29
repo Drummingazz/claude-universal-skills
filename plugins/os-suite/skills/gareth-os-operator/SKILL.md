@@ -24,13 +24,32 @@ Read both reference files before generating output.
 
 ---
 
+## Resolving the workspace path
+
+Never hardcode a drive letter or a user name. The workspace is the folder
+`Claude/Projects/Gareth Master AI Operating System Build` inside the user's Documents folder.
+Resolve `{{WORKSPACE_PATH}}` at the start of every run, taking the first of these that reaches a
+real folder:
+
+1. A path Gareth gives you in the invocation.
+2. `workspace_root` recorded in `OS_CONTEXT.md`, if that file is already reachable.
+3. The default: `<home>/Documents/Claude/Projects/Gareth Master AI Operating System Build`, where
+   `<home>` is the current user's home folder (`$HOME` on macOS and Linux, `%USERPROFILE%` on
+   Windows).
+
+Use forward slashes in every path you build from it. Windows accepts them as readily as macOS and
+Linux do, so one form works on every surface. If none of the three reaches a real folder, tell
+Gareth which paths you tried and stop.
+
+---
+
 ## Phase 0 — Silent discovery (no questions, no MCP calls)
 
 The user invokes this skill from inside their workspace folder. Everything here is filesystem-only. Do NOT call any vault MCP tools.
 
-1. **Verify the workspace folder exists.** The workspace is at `C:\Users\Gaming Pc\Documents\Claude\Projects\Gareth Master AI Operating System Build`. If you cannot reach it, tell Gareth and stop.
+1. **Verify the workspace folder exists.** Resolve `{{WORKSPACE_PATH}}` as described above. If you cannot reach it, tell Gareth and stop.
 2. **List the workspace folder contents.** `Glob` pattern `**/*` at the workspace root. Cache the result as `{{WORKSPACE_FILES}}`.
-3. **Read OS_CONTEXT.md if it exists** at `C:\Users\Gaming Pc\Documents\Claude\Projects\Gareth Master AI Operating System Build\OS_CONTEXT.md`.
+3. **Read OS_CONTEXT.md if it exists** at `{{WORKSPACE_PATH}}/OS_CONTEXT.md`.
    - If it exists: read it. This is the only file you need for bootstrap. Do NOT read the 5 global files unless a specific section is missing or a deep-read trigger is hit (see below).
    - If it does NOT exist: read the 5 global files as a fallback (`about_gareth.md`, `life_architecture.md`, `operating_principles.md`, `brand_voice.md`, `working_preferences.md`), then offer to generate `OS_CONTEXT.md` from them before proceeding.
 4. **Cache inferred values:**
@@ -38,17 +57,17 @@ The user invokes this skill from inside their workspace folder. Everything here 
    - `{{ENGINES}}` ← the 4 primary engines, in order: "Gareth Cohen Experience (GCE)", "Import/Export", "Nova Incepta", "AI Backend". Confirm from `life_architecture.md` if present; these are the defaults if not.
    - `{{OPERATOR_NAME}}` ← "Gareth OS Operator"
    - `{{OPERATOR_HANDLE}}` ← "gareth-os-operator"
-   - `{{WORKSPACE_PATH}}` ← `C:\Users\Gaming Pc\Documents\Claude\Projects\Gareth Master AI Operating System Build`
-   - `{{OPERATOR_PROMPT_PATH}}` ← `{{WORKSPACE_PATH}}\operator-prompt.md`
-   - `{{DAILY_FOLDER}}` ← `{{WORKSPACE_PATH}}\Daily`
-   - `{{ENGINE_FOLDER}}` ← `{{WORKSPACE_PATH}}\Engines`
-   - `{{REPORTS_FOLDER}}` ← `{{WORKSPACE_PATH}}\Reports`
-   - `{{TASK_LIST_PATH}}` ← `{{WORKSPACE_PATH}}\task-list.md`
+   - `{{WORKSPACE_PATH}}` ← whatever step 1 resolved (see "Resolving the workspace path" above)
+   - `{{OPERATOR_PROMPT_PATH}}` ← `{{WORKSPACE_PATH}}/operator-prompt.md`
+   - `{{DAILY_FOLDER}}` ← `{{WORKSPACE_PATH}}/Daily`
+   - `{{ENGINE_FOLDER}}` ← `{{WORKSPACE_PATH}}/Engines`
+   - `{{REPORTS_FOLDER}}` ← `{{WORKSPACE_PATH}}/Reports`
+   - `{{TASK_LIST_PATH}}` ← `{{WORKSPACE_PATH}}/task-list.md`
    - `{{SIGNATURE_BG_COLOR}}` ← `#1a1a2e` (dark navy — Gareth's default)
    - `{{SIGNATURE_FG_COLOR}}` ← `#e0e0e0`
    - `{{NO_EM_DASH}}` ← `true` (hard rule from working_preferences.md — no long dashes in any output)
 
-5. **If OS_CONTEXT.md did not exist and you just read the 5 global files,** offer to auto-generate `OS_CONTEXT.md` now from what you found. If Gareth confirms, write it to `{{WORKSPACE_PATH}}\OS_CONTEXT.md` using `references/OS_CONTEXT_template.md` as the structure, pre-filled with the values inferred from the 5 files. This saves tokens on every future run.
+5. **If OS_CONTEXT.md did not exist and you just read the 5 global files,** offer to auto-generate `OS_CONTEXT.md` now from what you found. If Gareth confirms, write it to `{{WORKSPACE_PATH}}/OS_CONTEXT.md` using `references/OS_CONTEXT_template.md` as the structure, pre-filled with the values inferred from the 5 files. This saves tokens on every future run.
 
 After Phase 0, summarise to Gareth in 4 short lines what you found. Format:
 
@@ -168,7 +187,7 @@ Show Gareth a short preview (title, cadence line, engines in scope, enabled conn
 If yes:
 
 - Use the `Write` tool.
-- Path: `{{OPERATOR_PROMPT_PATH}}` (i.e. `C:\Users\Gaming Pc\Documents\Claude\Projects\Gareth Master AI Operating System Build\operator-prompt.md`).
+- Path: `{{OPERATOR_PROMPT_PATH}}`, which is `operator-prompt.md` at the workspace root.
 - `Read` it back to confirm content is present.
 
 If the file already exists, ask before overwriting.
@@ -191,7 +210,7 @@ After the prompt is saved, **immediately invoke the `schedule` skill via the `Sk
 ### Build the trigger payload
 
 - **Cron expression** — from the table above.
-- **Working directory** — `C:\Users\Gaming Pc\Documents\Claude\Projects\Gareth Master AI Operating System Build`.
+- **Working directory** — `{{WORKSPACE_PATH}}`, as resolved in Phase 0.
 - **Prompt** — `"Run the Gareth OS Operator. Read and execute operator-prompt.md exactly as written. One run = one report. Stop when done."`
 - **Trigger name** — `gareth-os-operator-{{CADENCE_TAG}}`.
 - **Description** — `"Gareth OS Operator — {{CADENCE_HUMAN}}"`.

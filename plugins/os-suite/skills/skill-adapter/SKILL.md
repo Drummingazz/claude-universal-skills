@@ -53,9 +53,22 @@ User pastes a detailed change spec (PDF, markdown brief, prompt). Skip the inter
 ### Phase 1 — Confirm and read the existing skill
 
 1. Identify which skill. If unclear, ask.
-2. Resolve its path. Skills live under either:
-   - `C:\Users\Gaming Pc\AppData\Roaming\Claude\local-agent-mode-sessions\skills-plugin\...\skills\<name>\SKILL.md` (user-skills + Anthropic skills)
-   - `C:\Users\Gaming Pc\AppData\Roaming\Claude\local-agent-mode-sessions\486a8f4f-c7d3-4dfb-a3ce-908dffc91b8a\ce707f27-f4dd-49ec-96de-8fee939d7483\rpm\plugin_<id>\skills\<name>\SKILL.md` (installed plugins)
+2. Resolve its path. Never hardcode a drive letter or a user name: locate the file rather than
+   assuming it. Search with `Glob` for `**/skills/<name>/SKILL.md` across the candidate roots
+   below, in this order, and stop at the first hit. Use forward slashes throughout; Windows
+   accepts them as readily as macOS and Linux do.
+
+   | Order | Root | What lives there |
+   | --- | --- | --- |
+   | 1 | The vault's `Skills/` folder | The canonical hand-edited source. Prefer this whenever it holds the skill. |
+   | 2 | The marketplace repo working copy, `<home>/Documents/claude-universal-skills/plugins/*/skills/` | The distribution copy that ships to both surfaces. Edit here only to mirror a vault change. |
+   | 3 | `<home>/.claude/plugins/cache/` | Installed plugin copies. Read-only in practice: a change here is overwritten on the next plugin update. Never the edit target. |
+   | 4 | `<home>/.claude/skills/` | Local personal skills not yet in the marketplace. |
+   | 5 | The current session's own skills directory | Anthropic-shipped and account-synced skills. Read-only. On Windows this sits under `<home>/AppData/Roaming/Claude/local-agent-mode-sessions/`; do not assume that path, glob for it. |
+
+   `<home>` is the current user's home folder (`$HOME` on macOS and Linux, `%USERPROFILE%` on
+   Windows). If the same skill turns up in more than one root, say so and ask which copy is the
+   edit target before touching anything.
 3. Read the full SKILL.md and any referenced files in `scripts/`, `references/`, `assets/`.
 4. If user only described the skill but did not point to the file, build a provisional plan and mark it provisional.
 
@@ -66,7 +79,7 @@ Before any rewrite, copy the original to `SKILL.md.bak-YYYY-MM-DD` in the same f
 ### Phase 3 — Fork rule for read-only skills
 
 If the skill lives under an Anthropic-shipped path (read-only — verified by attempting backup and observing permission), do NOT overwrite. Fork to user-skill space:
-- New path: `C:\Users\Gaming Pc\AppData\Roaming\Claude\local-agent-mode-sessions\skills-plugin\...\skills\<original-name>-adapted\SKILL.md`
+- New path: the same `<original-name>-adapted` folder under the highest-priority writable root from the Phase 1 table, which in practice means the vault's `Skills/` folder.
 - Rename `name:` frontmatter to match the new folder.
 - Note the fork in the changelog.
 

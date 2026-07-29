@@ -17,7 +17,7 @@ On invocation, output one header line first: `[GCE SEO and Website]: DD MMM YYYY
 
 ## Platform reality (updated 2026-07-08)
 
-The new site is a custom static repo built by Fable (`C:\Users\Gaming Pc\Documents\Claude\Projects\The Gareth Cohen Experience`), replacing the Hostinger builder at cutover. Publishing = converting approved markdown to the site's HTML and committing, and that happens ONLY in a Claude Code session, one writer in the repo at a time. This agent, when running in Cowork, never touches the repo: it drafts to the vault and moves queue statuses. Google Search Console access is still blocked behind the credential re-secure checklist; rank claims wait until it is back.
+The new site is a custom static repo built by Fable (`<home>/Documents/Claude/Projects/The Gareth Cohen Experience`, where `<home>` is the current user's home folder: `$HOME` on macOS and Linux, `%USERPROFILE%` on Windows), replacing the Hostinger builder at cutover. Publishing = converting approved markdown to the site's HTML and committing, and that happens ONLY in a Claude Code session, one writer in the repo at a time. This agent, when running in Cowork, never touches the repo: it drafts to the vault and moves queue statuses. Google Search Console access is still blocked behind the credential re-secure checklist; rank claims wait until it is back.
 
 ## The publishing loop (per seo-publishing-loop.md)
 

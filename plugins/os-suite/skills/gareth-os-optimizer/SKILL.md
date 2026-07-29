@@ -47,15 +47,25 @@ This skill is adapted for Gareth's 4-engine AI OS workspace (not an Obsidian vau
 
 ## Step 0 -- Verify the workspace
 
-Check that the workspace root is present and has at least one .md file:
+Resolve `{{WORKSPACE_PATH}}` first. Never hardcode a drive letter or a user name. Take the first
+of these that reaches a real folder:
 
-```
-dir "C:\Users\Gaming Pc\Documents\Claude\Projects\Gareth Master AI Operating System Build" /b
-```
+1. A path Gareth gives you in the invocation.
+2. `workspace_root` recorded in `{{WORKSPACE_PATH}}/.claude/workspace-roles.json` or in
+   `OS_CONTEXT.md`, if either is already reachable.
+3. The default: `<home>/Documents/Claude/Projects/Gareth Master AI Operating System Build`, where
+   `<home>` is the current user's home folder (`$HOME` on macOS and Linux, `%USERPROFILE%` on
+   Windows).
+
+Use forward slashes in every path you build from it. Windows accepts them as readily as macOS and
+Linux do, so one form works on every surface.
+
+Then check the workspace root is present and has at least one .md file. Use `Glob` with the
+pattern `*.md` at `{{WORKSPACE_PATH}}`, not a shell command, so the check works on every surface.
 
 If the folder is unreachable or empty → stop:
 
-> Workspace not found or empty. Make sure Claude has access to `C:\Users\Gaming Pc\Documents\Claude\Projects\Gareth Master AI Operating System Build` and re-run.
+> Workspace not found or empty. Make sure Claude has access to the workspace folder and re-run. Tell Gareth which paths you tried.
 
 Otherwise tell Gareth one line:
 
@@ -203,11 +213,13 @@ Low-confidence custom roles → F9.0 finding asking Gareth to clarify the folder
 
 ### Output: the role registry
 
-Build once, cache, and persist to `{{WORKSPACE_PATH}}\.claude\workspace-roles.json`:
+Build once, cache, and persist to `{{WORKSPACE_PATH}}/.claude/workspace-roles.json`. Write the
+resolved `{{WORKSPACE_PATH}}` into `workspace_root` so later runs can read it back rather than
+guessing:
 
 ```json
 {
-  "workspace_root": "C:\\Users\\Gaming Pc\\Documents\\Claude\\Projects\\Gareth Master AI Operating System Build",
+  "workspace_root": "<the resolved {{WORKSPACE_PATH}}, forward slashes>",
   "discovered_at": "2026-05-26T09:00:00Z",
   "folder_index_convention": {
     "name": "README.md",
