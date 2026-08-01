@@ -1,6 +1,6 @@
 ---
 name: gigscan
-description: Daily gig-email sweep for The Gareth Cohen Experience. Scans Gareth's connected Gmail for messages from the four booking agencies (Rhythm Culture, Soul Drummer, African Drumming, Drumbeats) that read as a gig opportunity, proposal, offer, or confirmation, and alerts him to each. On a confirmation specifically, it extracts the gig details and creates the Google Calendar event automatically under the Calendar Naming Protocol 2026, colour-coded yellow for workshops and purple for performances, after checking the calendar so a manually entered event is never duplicated. Use when Gareth says "gig scan", "/gigscan", "scan agency emails", "check for gig confirmations", or as the daily automated sweep.
+description: Daily gig-email sweep for The Gareth Cohen Experience. Scans Gareth's connected Gmail for messages from the four booking agencies (Rhythm Culture, Soul Drummer, African Drumming, Drumbeats) that read as a gig opportunity, proposal, offer, or confirmation, and alerts him to each. On a confirmation specifically, it extracts the gig details and creates the Google Calendar event automatically under the Calendar Naming Protocol 2026, colour-coded yellow for workshops and purple for performances, after checking the calendar so a manually entered event is never duplicated. Also scans for Hostinger "You have a new message" website enquiry notifications and includes a recommended drafted reply (holding or priced) for each, built the same way the Bookings Manager builds it, gated for Gareth's approval. Use when Gareth says "gig scan", "/gigscan", "scan agency emails", "check for gig confirmations", or as the daily automated sweep.
 ---
 
 # Gigscan
@@ -22,15 +22,23 @@ Watch for messages from or clearly referencing these four agencies (source codes
 
 Sender domains are not confirmed in the vault yet, so search by name, not just `from:`. Do not assume a sender is one of these four agencies from domain alone if the name isn't confirmed; use the message content to confirm.
 
+Also watch for direct website enquiries: Hostinger form notifications, sender `noreply@notifications.hostinger.com`, subject a variant of "You have a new message". These are not agency emails, they are prospects contacting GCE directly through garethcohenexperience.com. They get a recommended draft reply, not a calendar event (see Step 2b).
+
 ## Step 1: Search Gmail
 
-Search the connected Gmail account (Gareth's "GC Gmail", read via the Gmail connector) with a query covering the last 2 days (a 2-day window gives overlap in case a run is missed, and duplicate alerts are prevented in Step 3):
+Search the connected Gmail account (Gareth's "GC Gmail", read via the Gmail connector) with two queries covering the last 2 days (a 2-day window gives overlap in case a run is missed, and duplicate alerts are prevented in Step 3):
 
+Agency search:
 ```
 ("Rhythm Culture" OR "Soul Drummer" OR "African Drumming" OR "Drumbeats" OR "drum beats") (gig OR booking OR workshop OR performance OR opportunity OR proposal OR offer OR confirm OR confirmed OR confirmation OR available OR availability) newer_than:2d
 ```
 
-If this returns nothing, also run a plain agency-name-only search (no keyword filter) over the same window in case a relevant email uses none of those words, and read the top results to judge relevance manually.
+Direct enquiry search:
+```
+from:noreply@notifications.hostinger.com subject:"you have a new message" newer_than:2d
+```
+
+If the agency search returns nothing, also run a plain agency-name-only search (no keyword filter) over the same window in case a relevant email uses none of those words, and read the top results to judge relevance manually.
 
 ## Step 2: Classify each thread
 
@@ -42,9 +50,27 @@ For each matching thread, read the full message (not just the snippet) and class
 
 Check the state log described in Step 6 before alerting, so a thread already surfaced in a previous run is not re-alerted, only its status change (opportunity to confirmation) is reported.
 
+## Step 2b: Hostinger direct enquiries, drafted by the Bookings Manager's own process
+
+This duty is owned by [[Skills/gce-bookings-manager|the Bookings Manager]], not by gigscan. Its pricing rules, fee build, and CRM state are the single source of truth and must not be forked or re-implemented here. Gigscan's job is only to fold that skill's process into the same daily report Gareth reads, so he doesn't need two separate runs to see one morning's leads.
+
+For each Hostinger thread found in Step 1 not already in the processed log:
+
+- Extract the fields: Website, Form name, Name, Phone, Your email, Address/Location, Orginisation or Plan Manager, Dates/Length/Times, Your requirements, Nature of Neurodiversity or similar sensitive field if present, Program Type.
+- Classify the GCE service from the form name and Program Type, exactly as [[Skills/gce-bookings-manager|gce-bookings-manager]] Mode 1 does.
+- Check the commercial-gate inputs against [[Engines/GCE/pricing-schedule]] and [[Engines/GCE/booking-pipeline]]: client type, date, time, location, session length, audience or participant numbers, equipment, travel, fee rule, availability. List what is MISSING, the Hostinger form rarely carries group size, session length, equipment, or fee.
+- Draft the recommended reply using gce-bookings-manager Mode 3's own rules: a holding reply (warm acknowledgement, no price, Gareth will follow up within 24 to 48 hours) if required inputs are missing, or a priced reply (fee built from the pricing schedule: segment rate, travel per the stated rate beyond the free first 10 km, equipment, add-ons, fee shown before the reply text) if everything needed is present. GCE voice: warm, plain English, mobile-friendly, no dashes, closes "Kind regards, Gareth Cohen, The Gareth Cohen Experience".
+- If the enquiry contains NDIS, school, aged care, or otherwise sensitive or vulnerable-client detail (for example a support need, diagnosis, or plan manager), flag it for [[gce-risk-reviewer]] review in the alert rather than treating the draft as routine, and keep that detail out of any calendar or title context entirely, it is quoting-only information.
+- This is a draft only. Gigscan never sends it and never writes it to the CRM. Approving the draft and logging the enquiry in HubSpot/Airtable stays with [[Skills/gce-bookings-manager|the Bookings Manager]], so enquiry state has one owner. Gigscan's alert should say plainly: "draft ready, approve to send, Bookings Manager will log it."
+
 ## Step 3: Alert
 
-Every opportunity, proposal, offer, and confirmation gets surfaced to Gareth, grouped by agency, in this shape: agency, one-line summary, date and location if known, status (opportunity or confirmed), and for a confirmation whether the calendar event was created or what's missing. Plain English, no dashes, mobile-friendly, matching [[Identity/me]] output preferences.
+Every agency opportunity, proposal, offer, and confirmation, and every new Hostinger direct enquiry, gets surfaced to Gareth in one report, grouped by source, in this shape:
+
+- Agency items: agency, one-line summary, date and location if known, status (opportunity or confirmed), and for a confirmation whether the calendar event was created or what's missing.
+- Direct enquiries: prospect name, service, one-line brief, what's missing (if anything), and the full recommended draft reply text underneath, ready to approve.
+
+Plain English, no dashes, mobile-friendly, matching [[Identity/me]] output preferences.
 
 If nothing relevant was found, say so in one line. Do not pad the report.
 
@@ -78,7 +104,7 @@ If the type is genuinely ambiguous, default to yellow (workshop is GCE's core se
 
 Before creating anything, call `list_events` (or a full-text search) on Gareth's primary calendar for a window covering the gig date (±1 day). Treat it as an existing manual entry, and skip creation, if an event on that date matches on any two of: the org/client name, the full address, or the source agency code. Report "already on the calendar, no duplicate created" in the alert rather than creating a second event.
 
-Maintain a small state log at `Engines/GCE/gigscan-processed-log.md` in the vault: one line per thread ID already alerted or already turned into a calendar event, with the date. Check it at the start of Step 2 and append to it after Step 3 and Step 7 each run, so re-runs don't re-alert or re-create.
+Maintain a small state log at `Engines/GCE/gigscan-processed-log.md` in the vault: one line per thread ID already alerted or already turned into a calendar event or already drafted for, with the date and whether it was an agency item or a Hostinger enquiry. Check it at the start of Step 2 and append to it after Step 3, Step 2b, and Step 7 each run, so re-runs don't re-alert, re-draft, or re-create.
 
 ## Step 7: Build and create the event
 
@@ -106,8 +132,9 @@ Write a short entry to `Daily/YYYY-MM-DD.md` (today's date) noting what was scan
 
 - Never invent a price, date, address, contact, or commitment. Mark anything unclear as MISSING and escalate rather than guess.
 - Never restart a qualification sequence on an already-qualified lead.
-- Never contact the agency or reply on Gareth's behalf. This skill reads, alerts, and writes calendar events only. Drafting or sending a reply is out of scope, hand that to [[Engines/GCE/agent-roster|the Bookings Manager]] or the Command Secretary.
-- Sensitive content (NDIS, school, vulnerable-client wording) still gets created on the calendar per the NDIS privacy rule above, but flag it for [[gce-risk-reviewer]] review in the alert rather than treating it as routine.
+- Never contact the agency or a prospect, and never send anything. This skill reads, alerts, drafts (Hostinger enquiries only, per Step 2b), and writes calendar events (confirmed agency gigs only, per Step 7). Sending a reply, or approving one, is Gareth's call, then [[Skills/gce-bookings-manager|the Bookings Manager]] sends and logs it.
+- Do not fork or re-implement the fee-building logic. It lives in [[Engines/GCE/pricing-schedule]] and [[Skills/gce-bookings-manager|gce-bookings-manager]] Mode 3. Gigscan applies that documented process, it does not maintain its own copy of it.
+- Sensitive content (NDIS, school, aged care, vulnerable-client wording) still gets created on the calendar per the NDIS privacy rule above, and still gets drafted per Step 2b, but flag it for [[gce-risk-reviewer]] review in the alert rather than treating it as routine.
 
 ## Related
 
@@ -115,3 +142,5 @@ Write a short entry to `Daily/YYYY-MM-DD.md` (today's date) noting what was scan
 - [[Engines/GCE/agencies-and-channels]]
 - [[Engines/GCE/booking-pipeline]]
 - [[Engines/GCE/agent-roster]]
+- [[Skills/gce-bookings-manager]]
+- [[Engines/GCE/pricing-schedule]]
