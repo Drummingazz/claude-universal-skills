@@ -13,7 +13,7 @@ On invocation, output one header line first: `[GCE Social Media Campaign]: DD MM
 
 - Engines/GCE: social-pipeline.md (the canonical operating model, manual-first), agent-roster.md, service-urls.md.
 - Architecture: brand.md (GCE voice by audience), System/operating-principles.md (approval model).
-- State lives in the GCE Ops Airtable base (appc4xMuaIKYZ1Har): ContentReserve (clip counts per program) and SocialQueue (every post: Type, Program, Platform, Account, Caption, MediaRef, ScheduledFor, Status Draft/Approved/Posted/Skipped, PostedAt). The CRM Command Centre's Content office reads both live; keep them truthful.
+- State lives in the GCE Ops Airtable base (appc4xMuaIKYZ1Har): ContentReserve (clip counts per program) and SocialQueue (every post: Type, Program, Platform, Account, Caption, MediaRef, ScheduledFor, Status Draft/Approved/Scheduled/Posted/Failed/Skipped, PostNow, PublishAttempts, PostedAt). The CRM Command Centre's Content office and the Pocket Cockpit both read this live; keep it truthful.
 - Media lives in Dropbox: `GCE Social/Inbox/{Program}` for video clips, `GCE Social/Assets/{Program}` for images.
 
 ## Human-only step (hard guardrail)
@@ -51,7 +51,23 @@ Warn early with a staged countdown per program at 4 posts remaining, then 2, the
 
 ## The automation switch (exists, OFF)
 
-Make scenario 5596668 "GCE Social Publisher (SKELETON, DO NOT ACTIVATE)" reads SocialQueue for Approved and due rows. It stays inactive until Gareth creates the Meta and LinkedIn connections and a per-type graduation call is made (text first, image second, video only if he ever wants it). Never activate it; blueprint archived in Engines/GCE/make-blueprints.
+Verified against the live scenario 3 Aug 2026. It is now Make scenario 5596668 "GCE Social Publisher (video rail v1)", last edited 1 Aug 2026, and it is still switched OFF (6 hour interval when on).
+
+Its real filter picks up a row only when ALL of these hold:
+
+- Status is **Scheduled**, or PostNow is ticked
+- Type is **Video**
+- PostNow is ticked, or ScheduledFor is already in the past
+- PublishAttempts is blank or under 2
+
+It publishes to **Instagram and Facebook only**. There is no LinkedIn, YouTube or TikTok route and no text or image route, so a Scheduled row that is not a Video on one of those two platforms is simply never picked up. On success it sets Status Posted, clears PostNow and stamps PostedAt.
+
+Two consequences worth holding on to:
+
+- **Approved is no longer a publishing state.** A row must reach Scheduled. Gareth moves it there from the Pocket Cockpit (Approve, or Post now which also ticks PostNow) or by hand in Airtable.
+- Everything outside the video rail is still manual-first, exactly as before.
+
+Never activate the scenario without Gareth's explicit yes; blueprint archived in Engines/GCE/make-blueprints.
 
 ## Closing step (every run that did real work)
 
