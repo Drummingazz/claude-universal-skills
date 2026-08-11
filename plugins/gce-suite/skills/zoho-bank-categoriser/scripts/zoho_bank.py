@@ -14,11 +14,13 @@ Credentials: .zoho_client JSON beside this script:
 Never paste these into chat. Run `setup` once with a grant code to
 create the file (see SKILL.md walkthrough).
 
-FIRST-LIVE-RUN NOTE: Zoho's uncategorised-transaction paths are drawn
-from Zoho's API docs via Sonnet's 2026-07-16 check but have not yet been
-exercised live from this script. The first Code-session run uses
-`probe` to verify paths and prints any 4xx body so the constants below
-can be corrected in one edit if Zoho's routing differs.
+CONFIRMED LIVE 2026-07-19: `probe` run against the real AU org. Token
+refresh works. Of the two candidate list shapes, only
+`/banktransactions/uncategorized` responds (34 items under
+'transactions'); `/banktransactions?filter_by=Status.Uncategorized`
+returns HTTP 400 "The account does not exist." and is dead. The dead
+shape is removed below since list_uncat()'s try-first-that-works loop
+no longer needs it as a fallback candidate.
 """
 import json, sys, csv, re, argparse, urllib.request, urllib.parse, os
 from datetime import date
@@ -28,9 +30,8 @@ ACCOUNTS = "https://accounts.zoho.com.au/oauth/v2/token"
 ORG = "7007064397"
 HERE = os.path.dirname(os.path.abspath(__file__))
 CRED_FILE = os.path.join(HERE, ".zoho_client")
-# Candidate endpoint shapes; probe confirms which responds.
+# Confirmed live 2026-07-19 via `probe`; see module docstring.
 LIST_PATHS = [
-    "/banktransactions?filter_by=Status.Uncategorized",
     "/banktransactions/uncategorized",
 ]
 CATEGORIZE_PATH = "/banktransactions/uncategorized/{id}/categorize"
@@ -66,6 +67,12 @@ def call(method, path, body=None, tok=None):
         raise
 
 def cmd_setup(a):
+    # Interactive mode: prompt in this window so nothing lands in any chat.
+    if not a.grant_code:
+        print("Zoho one-time setup. Paste each value from api-console.zoho.com.au and press Enter.")
+        a.client_id = input("Client ID: ").strip()
+        a.client_secret = input("Client Secret: ").strip()
+        a.grant_code = input("Grant code (from the Generate Code tab, valid ~10 min): ").strip()
     data = urllib.parse.urlencode({
         "grant_type": "authorization_code", "code": a.grant_code,
         "client_id": a.client_id, "client_secret": a.client_secret}).encode()
@@ -88,14 +95,36 @@ def cmd_probe(a):
             print(f"  fails: {p}")
 
 def load_rules(path):
+    """Parse the vault rule table.
+
+    A pattern cell may itself contain regex alternation with '|', which is also
+    the markdown cell separator, so cells are taken from the RIGHT: the last
+    four are Effective From, Effective To, Notes and (before them) Status, and
+    everything left over at the front rejoins into the pattern.
+    Columns: Pattern | Account | Business % | Service Line | Status | From | To | Notes
+    """
     rules = []
     for line in open(path, encoding="utf-8"):
         if not line.strip().startswith("|") or set(line.strip()) <= {"|", "-", " ", ":"}: continue
         cells = [c.strip() for c in line.strip().strip("|").split("|")]
-        if len(cells) < 6 or cells[0].lower() in ("pattern",): continue
-        rules.append({"pattern": cells[0], "account": cells[1], "pct": cells[2],
-                      "tag": cells[3], "status": cells[4].lower(), "notes": cells[5]})
+        if len(cells) < 8 or cells[0].lower() in ("pattern",): continue
+        pattern = "|".join(cells[:len(cells) - 7])
+        account, pct, tag, status, eff_from, eff_to, notes = cells[len(cells) - 7:]
+        rules.append({"pattern": pattern, "account": account, "pct": pct, "tag": tag,
+                      "status": status.lower(), "from": eff_from, "to": eff_to, "notes": notes})
     return rules
+
+def rule_applies(rule, txn_date):
+    """Honour the Effective From / Effective To window on a rule row.
+
+    The AI rows are deliberately date-split (50% before 2026-08-03, 70% from
+    2026-08-03). Ignoring the window silently applies the first matching row to
+    every date, which books the wrong business percentage.
+    """
+    d = (txn_date or "")[:10]
+    if rule["from"] and d and d < rule["from"]: return False
+    if rule["to"] and d and d > rule["to"]: return False
+    return True
 
 def list_uncat(tok):
     for p in LIST_PATHS:
@@ -115,11 +144,11 @@ def cmd_run(a):
     tok = token()
     rules = load_rules(a.rules)
     txns = list_uncat(tok)
-    acct = accounts_map(tok)
     plan, unmatched = [], []
     for t in txns:
         desc = (t.get("description") or t.get("payee") or "").lower()
-        hit = next((r for r in rules if re.search(r["pattern"].lower(), desc)), None)
+        hit = next((r for r in rules if rule_applies(r, t.get("date"))
+                    and re.search(r["pattern"].lower(), desc)), None)
         if hit: plan.append((t, hit))
         else: unmatched.append(t)
     print(f"{len(txns)} uncategorised | {len(plan)} rule-matched | {len(unmatched)} need review\n")
@@ -131,6 +160,9 @@ def cmd_run(a):
     if not a.apply:
         print("\nDRY RUN. Nothing written. Re-run with --apply to execute approved-auto rows only.")
         return
+    # Fetched lazily: /chartofaccounts needs ZohoBooks.settings.READ, which a
+    # banking-only self-client does not have. A dry run must not need it.
+    acct = accounts_map(tok)
     applied = 0
     for t, r in plan:
         if r["status"] != "approved-auto": continue
@@ -146,8 +178,8 @@ def cmd_run(a):
 def main():
     p = argparse.ArgumentParser()
     sub = p.add_subparsers(dest="cmd", required=True)
-    s = sub.add_parser("setup"); s.add_argument("--grant-code", required=True)
-    s.add_argument("--client-id", required=True); s.add_argument("--client-secret", required=True)
+    s = sub.add_parser("setup"); s.add_argument("--grant-code")
+    s.add_argument("--client-id"); s.add_argument("--client-secret")
     s.set_defaults(f=cmd_setup)
     s = sub.add_parser("probe"); s.set_defaults(f=cmd_probe)
     s = sub.add_parser("run"); s.add_argument("--rules", required=True)

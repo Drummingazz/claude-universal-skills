@@ -14,3 +14,6 @@ desktop.ini
 *_key
 *.pem
 *token*
+
+# Zoho self-client refresh token, written beside the categoriser script
+.zoho_client

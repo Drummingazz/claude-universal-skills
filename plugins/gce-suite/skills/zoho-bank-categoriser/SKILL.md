@@ -26,8 +26,14 @@ Claude Code sessions only. The script needs open network to zohoapis.com.au. If 
 1. Go to api-console.zoho.com.au and sign in with the Zoho account (the backend Gmail identity that owns Zoho Books).
 2. Add Client, choose **Self Client**, Create. Copy the Client ID and Client Secret it shows.
 3. On the Generate Code tab: scope `ZohoBooks.banking.ALL,ZohoBooks.settings.READ`, duration 10 minutes, any description. Generate and copy the code (it expires in about ten minutes, so do step 4 immediately).
-4. In a terminal beside the script: `python zoho_bank.py setup --grant-code <code> --client-id <id> --client-secret <secret>`. This exchanges the code for a refresh token and writes `.zoho_client`. Done; the ID, secret and code never enter a chat.
+4. Double-click `SETUP-ZOHO.bat` in the skill folder. A window opens and asks for the three values one at a time; paste each and press Enter. It exchanges the code for a permanent key and writes `.zoho_client`. Done; the ID, secret and code never enter a chat. (Terminal-comfortable alternative: `python zoho_bank.py setup` prompts the same way.)
 5. First run ever: `python zoho_bank.py probe` verifies the endpoint paths live (they came from Zoho's docs, not yet exercised); if a path 404s, correct the constants at the top of the script in one edit and record the working shape here.
+
+**Confirmed live 2026-07-19, re-confirmed 2026-08-11.** Token refresh works. Working list endpoint: `GET /banktransactions/uncategorized` (returns items under `transactions`; 34 in the queue at first probe, 52 on 2026-08-11). The other candidate shape, `/banktransactions?filter_by=Status.Uncategorized`, returns HTTP 400 "The account does not exist." and has now actually been removed from the script's `LIST_PATHS`. `categorize`/`match` write paths are still unexercised (dry-run only so far); confirm those the first time `--apply` actually runs.
+
+> [!warning] Setup is already done, do not redo it. A working `.zoho_client` has existed beside the script since 2026-07-19. A later brief assumed it was missing and sent a session off to build a new self-client. Run `probe` first; if it prints "Token OK", setup is done.
+
+**Scope gap, 2026-08-11.** The existing token carries `ZohoBooks.banking.ALL` but NOT `ZohoBooks.settings.READ`, so `GET /chartofaccounts` returns 401 code 57. That call is only needed to resolve account names to ids when writing, so it is now fetched lazily and a dry run no longer needs it. Before the first real `--apply`, either regenerate the self-client with both scopes, or read the chart of accounts through the Zoho MCP connector (`list_chart_of_accounts`) and hand the ids in.
 
 ## The working loop
 
