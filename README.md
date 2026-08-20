@@ -160,14 +160,35 @@ reverse is also true. Every plugin gets installed twice, once per surface. That 
 one repo reaching both, and it is still far better than hand copying skill files.
 
 1. Open **Customize** in the sidebar, then **Plugins**.
-2. Select **Add marketplace** and paste the repo URL. Cowork accepts either
+2. Click **Add**, select **Add marketplace**, and give it the repo. Cowork accepts either
    `https://github.com/Drummingazz/claude-universal-skills` or the shorthand
    `Drummingazz/claude-universal-skills`.
-3. The plugins from this repo now appear next to plugins from other marketplaces.
-   Select `roundtrip-test` and click **Install**.
-4. Open the installed plugin to see its skills, and confirm `roundtrip-check` is listed and
-   enabled.
-5. In a Cowork session, invoke the skill and confirm `ROUNDTRIP-OK-7F3A` comes back.
+3. Click **Browse**. This opens the Directory, which has three tabs: **Anthropic**, **Partners**
+   and **Personal**. It opens on Anthropic. **The plugins from this repo are under Personal.**
+4. Select the plugin you want and click the **+** on its card to install.
+5. Open the installed plugin to see its skills, and confirm they are listed and enabled.
+6. In a brand new Cowork session, invoke a skill from it and confirm it answers.
+
+**The Directory search box only searches the tab you are on.** Searching for one of your own
+plugins from the Anthropic tab returns "No plugins match your search", which reads exactly like
+the plugin is missing or the marketplace is broken. It is neither. Switch to Personal first.
+
+### Updating an installed plugin in Cowork
+
+There is no Update button, and the help docs do not cover this. The control is called **Sync**
+and it is reached through the add dialog:
+
+1. Customize > Plugins > **Add** > **Add marketplace**.
+2. Select the already-added repo from the dropdown.
+3. The dialog says "This marketplace is already added" in red. Ignore that. Click **Sync**.
+
+If Sync is greyed out, the marketplace registration is fine and the thing you actually want is
+to install or reinstall the plugin, not to sync the catalogue. Removing a plugin does not remove
+its marketplace, and the two are separate rows in separate places.
+
+There is also a **Sync automatically** toggle in that dialog, described as "Keep plugins up to
+date when the repository changes on GitHub". It does not help with a plugin that is not
+installed, since there is nothing to update.
 
 ### Why this repo is public
 
@@ -189,7 +210,7 @@ There are two separate caches, and they refresh independently:
 
 | Layer | What it is | How it refreshes |
 | --- | --- | --- |
-| Marketplace catalogue | The list of what plugins exist | `/plugin marketplace update gareth-skills` in Code. The **Update** button on the marketplace in Cowork. |
+| Marketplace catalogue | The list of what plugins exist | `/plugin marketplace update gareth-skills` in Code. In Cowork, **Sync**. See below. |
 | Installed plugin | The actual skill files | Follows the plugin's version. See below. |
 
 **Version resolution.** Claude decides "is this a new version?" using the first of these that is set:
@@ -242,14 +263,26 @@ you pushed.
 `~/.claude/skills/` and tell you the install worked when it did not. Only the namespaced form
 proves the plugin loaded.
 
-**The `mirror-skill.js` PostToolUse hook contaminates tests on Gareth's Windows machine.** It
-copies any `SKILL.md` written or edited in a Claude Code session into `~/.claude/skills/<name>/`.
-Editing a skill in this repo therefore creates a second, local copy that shadows the plugin. When
-testing a change here, delete the mirrored copy first:
+**A skill can silently fork, and the copies drift for weeks without an error.** This happened to
+`gce-finance-controller` and cost a day on 2026-08-20. The repo copy held the 2026-08-03 pre-send
+verification checklist and the 2026-08-11 session clock rule. The account-library copy held the
+2026-08-16 standard procedure and approval block. **Neither was a superset**, and nothing warned
+that two copies existed.
 
-```bash
-rm -rf "$HOME/.claude/skills/<skill-name>"
-```
+The mechanism: `save_skill`, and editing a skill through Customize, both write to the account
+skill library, which is a **different copy** from the one this repo ships as a plugin. Nothing in
+either interface tells you that. A session that improves a skill in Cowork therefore forks it.
+
+**The rule that prevents it: any skill that ships as a plugin is edited in this repo and nowhere
+else.** If a session proposes saving one through `save_skill` or Customize, redirect it to the
+repo. One canonical home, one distribution path.
+
+**Historical note.** An earlier `mirror-skill.js` PostToolUse hook did something similar,
+copying any `SKILL.md` edited in a Claude Code session into `~/.claude/skills/<name>/`. That hook
+was **retired on 2026-07-29** and its registration removed from `settings.json`. It is not the
+cause of any fork dated after that, and this README previously said otherwise, which sent a
+2026-08-20 debugging session down the wrong path for most of a day. Check `settings.json` for a
+live `hooks` key before believing any claim about hooks, including this one.
 
 **A session keeps the plugin version it loaded at launch.** Push, refresh the marketplace, then
 start a new session. Testing in the session that was already open tells you nothing.
@@ -265,9 +298,31 @@ Cowork plugin as broken.**
 **Cowork does not use the `plugin:skill` namespace when you type it.** Claude Code wants
 `/roundtrip-test:roundtrip-check`. In Cowork you type the bare `/roundtrip-check`.
 
-## Relationship to `~/.claude/skills/`
+## The other skill stores, and why they matter
 
-`~/.claude/skills/` is the existing local store on Gareth's Windows machine, mirrored there by
-a `PostToolUse` hook. It is untouched by this repo and keeps working exactly as it does now.
-Migration of those skills into this marketplace is a separate, deliberate step, taken one skill
-at a time after the round trip is proven.
+This repo is not the only place a skill can live. Knowing which store you are looking at is the
+difference between a two minute update and a lost day.
+
+| Store | What it is | How it is changed |
+| --- | --- | --- |
+| This repo | The canonical source for everything shipped as a plugin | git commit and push |
+| Account skill library | Personal skills synced through your claude.ai account, shown in Customize > Skills | Customize UI, or `save_skill` from a session. Deleting the files does nothing, the sync restores them |
+| `~/.claude/skills/` | The Claude Code local store on Gareth's Windows machine | files on disk |
+| Plugin caches | One per surface, copied down from this repo | never edit these, they are overwritten |
+
+**A skill present in both this repo and the account library is a collision, not a backup.** Both
+are exposed to a session at once, with near-identical descriptions, so which one answers a plain
+request like "invoice this booking" is not predictable. On 2026-08-20 ten skills were in this
+state and the account-library copies were removed to resolve it.
+
+### This repo is not a complete backup
+
+As of 2026-08-20, these exist in the account library or the vault but **nowhere in this repo's
+git history**, so nothing here would restore them:
+
+- `daily-close`, which has no ship or no-ship decision recorded anywhere
+- `email-scan`, `email-response-workflow`, `email-scanner-ge`, deliberately unshipped, vault is
+  their home
+- `ge-command-centre-stress-test`, which has never been in this repo in any commit on any branch
+
+Check that list before deleting anything from another store on the assumption that git holds it.
